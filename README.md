@@ -55,11 +55,13 @@ PORT=3000
 
 ### 5. Build Assets
 
-Download Bootstrap CSS locally:
+Copy Bootstrap CSS, JS, and fonts from npm packages to public directory:
 
 ```bash
 npm run build
 ```
+
+**Note:** The build process copies files from `node_modules` to `public/` directory. These generated files are excluded from git and can be recreated by running `npm run build`.
 
 ### 6. Start the Application
 

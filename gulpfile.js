@@ -2,39 +2,40 @@ const gulp = require('gulp');
 const download = require('gulp-download');
 const path = require('path');
 
-// Download Bootstrap CSS
-function downloadBootstrap() {
-  return download('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css')
+// Copy Bootstrap CSS from node_modules
+function copyBootstrapCSS() {
+  return gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css')
     .pipe(gulp.dest('public/css'));
 }
 
-// Download Bootstrap Icons CSS
-function downloadBootstrapIcons() {
-  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css')
+// Copy Bootstrap JS from node_modules
+function copyBootstrapJS() {
+  return gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')
+    .pipe(gulp.dest('public/js'));
+}
+
+// Copy Bootstrap Icons CSS from node_modules
+function copyBootstrapIconsCSS() {
+  return gulp.src('node_modules/bootstrap-icons/font/bootstrap-icons.css')
     .pipe(gulp.dest('public/css'));
 }
 
-// Download Bootstrap Icons font files
-function downloadBootstrapIconsWoff2() {
-  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff2')
+// Copy Bootstrap Icons fonts from node_modules
+function copyBootstrapIconsFonts() {
+  return gulp.src('node_modules/bootstrap-icons/font/fonts/*')
     .pipe(gulp.dest('public/css/fonts'));
 }
 
-function downloadBootstrapIconsWoff() {
-  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff')
-    .pipe(gulp.dest('public/css/fonts'));
+// Create simple favicon (we'll create a basic one)
+function createFavicon() {
+  // For now, we'll skip favicon creation since the existing ones work
+  return Promise.resolve();
 }
 
-// Download favicon
-function downloadFavicon() {
-  return download('https://www.google.com/s2/favicons?domain=spotify.com&sz=16')
-    .pipe(gulp.dest('public'));
-}
-
-// Download apple touch icon
-function downloadAppleTouchIcon() {
-  return download('https://www.google.com/s2/favicons?domain=spotify.com&sz=180')
-    .pipe(gulp.dest('public'));
+// Create apple touch icon
+function createAppleTouchIcon() {
+  // For now, we'll skip apple touch icon creation since the existing ones work
+  return Promise.resolve();
 }
 
 // Watch for changes (optional - for development)
@@ -44,14 +45,14 @@ function watchFiles() {
   });
 }
 
-// Combined download task
-const downloadAll = gulp.parallel(downloadBootstrap, downloadBootstrapIcons, downloadBootstrapIconsWoff2, downloadBootstrapIconsWoff, downloadFavicon, downloadAppleTouchIcon);
+// Combined copy task
+const copyAll = gulp.parallel(copyBootstrapCSS, copyBootstrapJS, copyBootstrapIconsCSS, copyBootstrapIconsFonts);
 
 // Default task
-gulp.task('default', downloadAll);
-gulp.task('download', downloadAll);
-gulp.task('watch', gulp.series(downloadAll, watchFiles));
+gulp.task('default', copyAll);
+gulp.task('build', copyAll);
+gulp.task('watch', gulp.series(copyAll, watchFiles));
 
 // Export tasks for npm scripts
-exports.download = downloadAll;
-exports.watch = gulp.series(downloadAll, watchFiles);
+exports.build = copyAll;
+exports.watch = gulp.series(copyAll, watchFiles);

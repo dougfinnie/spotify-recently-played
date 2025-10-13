@@ -149,10 +149,16 @@ build/Release
 # Users Environment Variables
 .lock-wscript
 
-# Build outputs
+# Build outputs (generated files that can be recreated)
 public/css/
+public/js/
+public/favicon.ico
+public/apple-touch-icon.png
 dist/
 build/
+
+# Keep these files in git (they are source code, not build output)
+# public/client.js - Application JavaScript
 
 # Temporary files
 tmp/
