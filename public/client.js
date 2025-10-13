@@ -2,9 +2,15 @@
 // run by the browser each time your view template is loaded
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Check if user is logged in (has data in localStorage)
   if (localStorage.getItem("spotify-recent") != null) {
     document.getElementById("login").style.display = "none";
+    document.querySelector('a[href="/logout"]').style.display = "inline-block"; // Show logout button
     displayRecent(JSON.parse(localStorage.getItem("spotify-recent")));
+  } else {
+    // User is not logged in, show login button and hide logout
+    document.getElementById("login").style.display = "inline-block";
+    document.querySelector('a[href="/logout"]').style.display = "none"; // Hide logout button
   }
 
   document.getElementById("login").addEventListener('click', function() {
@@ -17,6 +23,24 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => console.error('Error:', error));
   });
+
+  // Handle logout - clear localStorage and show login button
+  const logoutLink = document.querySelector('a[href="/logout"]');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+      e.preventDefault(); // Prevent default navigation
+      localStorage.removeItem("spotify-recent"); // Clear stored data
+      document.getElementById("login").style.display = "inline-block"; // Show login button
+      logoutLink.style.display = "none"; // Hide logout button
+      document.getElementById("data-container-recent").innerHTML = `
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-music-note-beamed display-4 d-block mb-3" aria-hidden="true"></i>
+          <p class="mb-0">No tracks to display yet. Click "Log in" to get started!</p>
+        </div>
+      `; // Reset content
+      window.location.href = "/"; // Navigate to home page
+    });
+  }
 
   const hash = window.location.hash
     .substring(1)
@@ -38,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         // "Data" is the array of track objects we get from the API. See server.js for the function that returns it.
         localStorage.setItem("spotify-recent", JSON.stringify(data));
+        document.getElementById("login").style.display = "none"; // Hide login button
+        document.querySelector('a[href="/logout"]').style.display = "inline-block"; // Show logout button
         displayRecent(data);
       })
       .catch(error => console.error('Error:', error));
