@@ -1,25 +1,46 @@
 {
-  "name": "my-glitch-app",
-  "version": "0.0.1",
-  "description": "What am I about?",
+  "name": "spotify-recentlyplayed",
+  "version": "1.0.0",
+  "description": "A secure Node.js application to view your Spotify recently played tracks",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "gulp download",
+    "watch": "gulp watch",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run format:check"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "spotify-web-api-node": "^4.0.0"
+    "express": "^4.19.2",
+    "spotify-web-api-node": "^5.0.2"
+  },
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-download": "^0.0.1",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1"
   },
   "engines": {
-    "node": "8.x"
-  },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/welcome-project"
+    "node": ">=22.0.0"
   },
   "license": "MIT",
   "keywords": [
+    "spotify",
+    "music",
+    "recently-played",
+    "oauth",
     "node",
-    "glitch",
-    "express"
-  ]
+    "express",
+    "bootstrap"
+  ],
+  "author": "Doug",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dougfinnie/spotify-recentlyplayed.git"
+  }
 }
