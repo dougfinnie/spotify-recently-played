@@ -2,15 +2,17 @@
 // run by the browser each time your view template is loaded
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Check if user is logged in (has data in localStorage)
-  if (localStorage.getItem("spotify-recent") != null) {
-    document.getElementById("login").style.display = "none";
-    document.querySelector('a[href="/logout"]').style.display = "inline-block"; // Show logout button
-    displayRecent(JSON.parse(localStorage.getItem("spotify-recent")));
-  } else {
-    // User is not logged in, show login button and hide logout
-    document.getElementById("login").style.display = "inline-block";
-    document.querySelector('a[href="/logout"]').style.display = "none"; // Hide logout button
+  // Check authentication status via server session
+  checkAuthStatus();
+  
+  // Handle URL parameters for auth success/logout
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('auth') === 'success') {
+    showMessage('Authentication successful!', 'success');
+    loadRecentTracks();
+  } else if (urlParams.get('logout') === 'success') {
+    showMessage('Logged out successfully!', 'info');
+    clearDisplay();
   }
 
   document.getElementById("login").addEventListener('click', function() {
@@ -18,59 +20,92 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch("/authorize")
       .then(response => response.text())
       .then(data => {
-        console.log(data);
         window.location = data;
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('Authentication failed. Please try again.', 'danger');
+      });
   });
 
-  // Handle logout - clear localStorage and show login button
+  // Handle logout - redirect to server logout endpoint
   const logoutLink = document.querySelector('a[href="/logout"]');
   if (logoutLink) {
     logoutLink.addEventListener('click', function(e) {
       e.preventDefault(); // Prevent default navigation
-      localStorage.removeItem("spotify-recent"); // Clear stored data
-      document.getElementById("login").style.display = "inline-block"; // Show login button
-      logoutLink.style.display = "none"; // Hide logout button
-      document.getElementById("data-container-recent").innerHTML = `
-        <div class="text-center text-muted py-4">
-          <i class="bi bi-music-note-beamed display-4 d-block mb-3" aria-hidden="true"></i>
-          <p class="mb-0">No tracks to display yet. Click "Log in" to get started!</p>
-        </div>
-      `; // Reset content
-      window.location.href = "/"; // Navigate to home page
+      window.location.href = "/logout"; // Server will handle session cleanup
     });
   }
 
-  const hash = window.location.hash
-    .substring(1)
-    .split("&")
-    .reduce(function(initial, item) {
-      if (item) {
-        var parts = item.split("=");
-        initial[parts[0]] = decodeURIComponent(parts[1]);
-      }
-      return initial;
-    }, {});
-  window.location.hash = "";
-
-  if (hash.access_token) {
-    fetch("/recent", {
-      headers: { Authorization: `Bearer ${hash.access_token}` }
-    })
+  // Check authentication status via server
+  function checkAuthStatus() {
+    fetch('/auth-status')
       .then(response => response.json())
       .then(data => {
-        // "Data" is the array of track objects we get from the API. See server.js for the function that returns it.
-        localStorage.setItem("spotify-recent", JSON.stringify(data));
-        document.getElementById("login").style.display = "none"; // Hide login button
-        document.querySelector('a[href="/logout"]').style.display = "inline-block"; // Show logout button
-        displayRecent(data);
+        if (data.authenticated) {
+          document.getElementById("login").style.display = "none";
+          document.querySelector('a[href="/logout"]').style.display = "inline-block";
+          loadRecentTracks();
+        } else {
+          document.getElementById("login").style.display = "inline-block";
+          document.querySelector('a[href="/logout"]').style.display = "none";
+          clearDisplay();
+        }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Auth check failed:', error);
+        showMessage('Unable to verify authentication status.', 'warning');
+      });
   }
 
-  function refresh(access_token) {
-    localStorage.removeItem("spotify-recent");
+  // Load recent tracks from server
+  function loadRecentTracks() {
+    fetch('/recent')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch recent tracks');
+        }
+        return response.json();
+      })
+      .then(data => {
+        displayRecent(data);
+      })
+      .catch(error => {
+        console.error('Error loading tracks:', error);
+        showMessage('Failed to load recent tracks. Please try logging in again.', 'danger');
+        // Reset to login state
+        document.getElementById("login").style.display = "inline-block";
+        document.querySelector('a[href="/logout"]').style.display = "none";
+      });
+  }
+
+  // Clear display and show default message
+  function clearDisplay() {
+    document.getElementById("data-container-recent").innerHTML = `
+      <div class="text-center text-muted py-4">
+        <i class="bi bi-music-note-beamed display-4 d-block mb-3" aria-hidden="true"></i>
+        <p class="mb-0">No tracks to display yet. Click "Log in" to get started!</p>
+      </div>
+    `;
+  }
+
+  // Show user messages
+  function showMessage(message, type) {
+    const container = document.getElementById("data-container-recent");
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.remove();
+      }
+    }, 5000);
   }
 
   function displayRecent(data) {
