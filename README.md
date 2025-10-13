@@ -16,7 +16,7 @@ A secure Node.js application that allows you to log in to your Spotify account a
 
 ```bash
 git clone <your-repo-url>
-cd spotify-recentlyplayed
+cd spotify-recently-played
 ```
 
 ### 2. Install Dependencies

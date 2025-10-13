@@ -21,14 +21,14 @@ app.get("/", function (request, response) {
 var SpotifyWebApi = require('spotify-web-api-node');
 
 // Replace with your redirect URI, required scopes, and show_dialog preference
-var redirectUri = 'https://spotify-recentlyplayed.glitch.me/callback';
+var redirectUri = process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/callback';
 var scopes = ['user-read-recently-played'];
 var showDialog = true;
 
 // The API object we'll use to interact with the API
 var spotifyApi = new SpotifyWebApi({
-  clientId : process.env.CLIENT_ID,
-  clientSecret : process.env.CLIENT_SECRET,
+  clientId : process.env.SPOTIFY_CLIENT_ID,
+  clientSecret : process.env.SPOTIFY_CLIENT_SECRET,
   redirectUri : redirectUri
 });
 

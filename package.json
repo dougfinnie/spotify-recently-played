@@ -1,5 +1,5 @@
 {
-  "name": "spotify-recentlyplayed",
+  "name": "spotify-recently-played",
   "version": "1.0.0",
   "description": "A secure Node.js application to view your Spotify recently played tracks",
   "main": "server.js",
@@ -41,6 +41,6 @@
   "author": "Doug",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dougfinnie/spotify-recentlyplayed.git"
+    "url": "https://github.com/dougfinnie/spotify-recently-played.git"
   }
 }
