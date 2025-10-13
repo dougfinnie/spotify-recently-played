@@ -9,7 +9,17 @@ var express = require('express');
 var app = express();
 
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (path.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (path.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    }
+  }
+}));
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (request, response) {

@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const download = require('gulp-download');
+const replace = require('gulp-replace');
 const path = require('path');
 
 // Copy Bootstrap CSS from node_modules
@@ -14,15 +15,22 @@ function copyBootstrapJS() {
     .pipe(gulp.dest('public/js'));
 }
 
-// Copy Bootstrap Icons CSS from node_modules
-function copyBootstrapIconsCSS() {
-  return gulp.src('node_modules/bootstrap-icons/font/bootstrap-icons.css')
+// Download Bootstrap Icons from CDN (more reliable for fonts)
+function downloadBootstrapIconsCSS() {
+  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css')
+    .pipe(replace(/url\("\.\/fonts\/bootstrap-icons\.woff2\?[^"]*"\)/g, 'url("./fonts/bootstrap-icons.woff2")'))
+    .pipe(replace(/url\("\.\/fonts\/bootstrap-icons\.woff\?[^"]*"\)/g, 'url("./fonts/bootstrap-icons.woff")'))
     .pipe(gulp.dest('public/css'));
 }
 
-// Copy Bootstrap Icons fonts from node_modules
-function copyBootstrapIconsFonts() {
-  return gulp.src('node_modules/bootstrap-icons/font/fonts/*')
+// Download Bootstrap Icons fonts from CDN
+function downloadBootstrapIconsWoff2() {
+  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff2')
+    .pipe(gulp.dest('public/css/fonts'));
+}
+
+function downloadBootstrapIconsWoff() {
+  return download('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff')
     .pipe(gulp.dest('public/css/fonts'));
 }
 
@@ -46,7 +54,7 @@ function watchFiles() {
 }
 
 // Combined copy task
-const copyAll = gulp.parallel(copyBootstrapCSS, copyBootstrapJS, copyBootstrapIconsCSS, copyBootstrapIconsFonts);
+const copyAll = gulp.parallel(copyBootstrapCSS, copyBootstrapJS, downloadBootstrapIconsCSS, downloadBootstrapIconsWoff2, downloadBootstrapIconsWoff);
 
 // Default task
 gulp.task('default', copyAll);
